@@ -1,1 +1,2 @@
 # Proyecto-TinyML-LIDI-UNLP
+Este repositorio contiene los archivos y la documentación necesarios para el proyecto "TinyML: Integrando Inteligencia Artificial en Sistemas Embebidos". El objetivo de este proyecto es explorar y demostrar cómo la inteligencia artificial y el aprendizaje automático pueden ser implementados en sistemas embebidos de recursos limitados, utilizando tecnologías tales como EmbedIA y microcontroladores como el ESP32.
