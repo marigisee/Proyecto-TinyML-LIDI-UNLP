@@ -138,9 +138,8 @@ void loop() {
   foto = usarMax ? fotoMaxPooleada : fotoAveragePooleada;
   
   printImage();
-  
-  //printVectorInt(fb->buf); // imprime imagen original
-  //printVectorFloat(foto); // imprime imagen con averagePooling
+
+  printVectors();
 
   Serial.print("Formato: ");  Serial.print(fb->format);
   Serial.print(", Len: ");    Serial.print(fb->len);
@@ -238,6 +237,15 @@ void printImage(){
 
 }
 
+
+// ----------- printVectors ----------- //
+// --->  Para ver los vectores
+void printVectors(uint8_t * v){
+  Serial.print("Imagen original: "); printVectorInt(fb->buf);  
+  Serial.print("Imagen con maxPooling: "); printVectorFloat(fotoMaxPooleada);  
+  Serial.print("Imagen con averagePooling: "); printVectorFloat(fotoAveragePooleada);  
+}
+
 // ----------- printVectorInt ----------- //
 // ---> Imprime los valores enteros que representan la imagen original capturada
 // ---> Utiliza el formato de numpy array para facilitar su análisis posterior
@@ -250,6 +258,8 @@ void printVectorInt(uint8_t * v){
     }
     Serial.println("]}");
 }
+
+
 
 // ----------- printVectorFloat ----------- //
 // ---> Imprime los valores en float que representan la imagen procesada
