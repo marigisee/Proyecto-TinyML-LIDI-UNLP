@@ -44,7 +44,7 @@
 #define PCLK_GPIO_NUM     22
 
 
-// --> Const utilizados en la funcion MaxPooling()
+// --> Const utilizados en la funcion averagePooling()
   // Definir tamaño de la imagen original y la imagen resultante
   #define ORIG_SIZE 96 //--> size original img
   #define POOL_SIZE 48 //--> size pooling img
@@ -129,12 +129,12 @@ void loop() {
 
   uint32_t i;
 
-  maxPooling(fb->buf, foto, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with maxpooling 
+  averagePooling(fb->buf, foto, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
 
   printImage();
   
   //printVectorInt(fb->buf); // imprime imagen original
-  //printVectorFloat(foto); // imprime imagen con maxpooling
+  //printVectorFloat(foto); // imprime imagen con averagePooling
 
   Serial.print("Formato: ");  Serial.print(fb->format);
   Serial.print(", Len: ");    Serial.print(fb->len);
@@ -247,7 +247,7 @@ void printVectorInt(uint8_t * v){
 
 // ----------- printVectorFloat ----------- //
 // ---> Imprime los valores en float que representan la imagen procesada
-// ---> Los valores representan los píxeles después de aplicar la operación de max pooling
+// ---> Los valores representan los píxeles después de aplicar la operación de averagePooling
 
 void printVectorFloat(float * v){
     int i;
@@ -260,25 +260,23 @@ void printVectorFloat(float * v){
 }
 
 
-// ----------- maxPooling ----------- //
+// ----------- averagePooling ----------- //
 
-
-void maxPooling(uint8_t* input, float* output, int origSize, int poolSize) {
+void averagePooling(uint8_t* input, float* output, int origSize, int poolSize) {
   int stride = origSize / poolSize;
   for (int i = 0; i < poolSize; i++) {
     for (int j = 0; j < poolSize; j++) {
-      uint8_t maxVal = 0;
+      float sumVal = 0.0;
       for (int m = 0; m < stride; m++) {
         for (int n = 0; n < stride; n++) {
           int x = i * stride + m;
           int y = j * stride + n;
-          if (input[x * origSize + y] > maxVal) {
-            maxVal = input[x * origSize + y];
-          }
+          sumVal += input[x * origSize + y];
         }
       }
-      output[i * poolSize + j] = maxVal;
+      output[i * poolSize + j] = sumVal / (stride * stride);
     }
   }
 }
+
 
