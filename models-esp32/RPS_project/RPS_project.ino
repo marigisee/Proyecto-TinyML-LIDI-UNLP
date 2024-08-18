@@ -279,4 +279,23 @@ void averagePooling(uint8_t* input, float* output, int origSize, int poolSize) {
   }
 }
 
+// ----------- maxPooling ----------- //
 
+void maxPooling(uint8_t* input, float* output, int origSize, int poolSize) {
+  int stride = origSize / poolSize;
+  for (int i = 0; i < poolSize; i++) {
+    for (int j = 0; j < poolSize; j++) {
+      uint8_t maxVal = 0;
+      for (int m = 0; m < stride; m++) {
+        for (int n = 0; n < stride; n++) {
+          int x = i * stride + m;
+          int y = j * stride + n;
+          if (input[x * origSize + y] > maxVal) {
+            maxVal = input[x * origSize + y];
+          }
+        }
+      }
+      output[i * poolSize + j] = maxVal;
+    }
+  }
+}
