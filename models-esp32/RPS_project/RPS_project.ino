@@ -53,6 +53,8 @@
 
 
 float foto[INPUT_SIZE];
+float fotoMaxPooleada[INPUT_SIZE];
+float fotoAveragePooleada[INPUT_SIZE];
 data3d_t input = { INPUT_CHANNELS, INPUT_WIDTH, INPUT_HEIGHT, foto};
 data1d_t results;
 char * labels[] = {"Piedra","Papel","Tijera","Nada "};
@@ -129,8 +131,12 @@ void loop() {
 
   uint32_t i;
 
-  averagePooling(fb->buf, foto, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
+  maxPooling(fb->buf, fotoMaxPooleada, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
+  averagePooling(fb->buf, fotoAveragePooleada, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
 
+  float usarMax = 1.0f;
+  foto = usarMax ? fotoMaxPooleada : fotoAveragePooleada;
+  
   printImage();
   
   //printVectorInt(fb->buf); // imprime imagen original
