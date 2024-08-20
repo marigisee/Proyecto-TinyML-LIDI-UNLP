@@ -120,9 +120,10 @@ void setup() {
 
 // ----------- loop ----------- //
 
+// la declaro global asi print vector puede imprimir la imagen original
+camera_fb_t * fb = NULL;
 
 void loop() {
-  camera_fb_t * fb = NULL;
 
   fb = esp_camera_fb_get();
   if (!fb) {
@@ -134,8 +135,12 @@ void loop() {
   maxPooling(fb->buf, fotoMaxPooleada, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
   averagePooling(fb->buf, fotoAveragePooleada, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
 
-  float usarMax = 1.0f;
-  foto = usarMax ? fotoMaxPooleada : fotoAveragePooleada;
+  float usarMax = 0.0f;
+  if (usarMax) {
+    memcpy(foto, fotoMaxPooleada, sizeof(fotoMaxPooleada));
+  } else {
+    memcpy(foto, fotoAveragePooleada, sizeof(fotoAveragePooleada));
+  }
   
   printImage();
 
@@ -240,7 +245,7 @@ void printImage(){
 
 // ----------- printVectors ----------- //
 // --->  Para ver los vectores
-void printVectors(uint8_t * v){
+void printVectors(){
   Serial.print("Imagen original: "); printVectorInt(fb->buf);  
   Serial.print("Imagen con maxPooling: "); printVectorFloat(fotoMaxPooleada);  
   Serial.print("Imagen con averagePooling: "); printVectorFloat(fotoAveragePooleada);  
@@ -251,12 +256,12 @@ void printVectors(uint8_t * v){
 // ---> Utiliza el formato de numpy array para facilitar su análisis posterior
 void printVectorInt(uint8_t * v){
     int i;
-    Serial.print("vector_orig = np.array{[");
+    Serial.print("vector_orig = np.array([");
     for(i=0;i<96*96;i++){
         Serial.print(v[i]);
         Serial.print(",");
     }
-    Serial.println("]}");
+    Serial.println("])");
 }
 
 
@@ -267,12 +272,12 @@ void printVectorInt(uint8_t * v){
 
 void printVectorFloat(float * v){
     int i;
-    Serial.print("vector_recortado = np.array{[");
+    Serial.print("img_ = np.array([");
     for(i=0;i<INPUT_SIZE;i++){
         Serial.print(v[i]);
         Serial.print(",");
     }
-    Serial.println("]}");
+    Serial.println("])");
 }
 
 
