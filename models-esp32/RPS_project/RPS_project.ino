@@ -1,3 +1,4 @@
+#include "game_logic.h"
 #include "take_photo_and_predict.h"
 
 // ----------- setup ----------- //
@@ -7,5 +8,6 @@ void setup() {
 
 // ----------- loop ----------- //
 void loop() {
-  uint16_t prediction = take_photo_and_get_prediction(); 
+  iteration();
+
 }
