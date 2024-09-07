@@ -1,5 +1,4 @@
 #include "game_logic.h"
-#include "take_photo_and_predict.h"
 
 #define CONSECUTIVE_DETECTIONS_REQUIRED 3
 #define CONSECUTIVE_NOTHING_REQUIRED 3
@@ -133,51 +132,4 @@ void activateServo(Move move) {
       // Reset servo to neutral position
       break;
   }
-}
-
-void calculateAndShowResult(Move playerMove, Move programMove) {
-  int result;
-  if (playerMove == programMove) {
-    result = 0;  // Tie
-  } else if ((playerMove == ROCK && programMove == SCISSORS) ||
-             (playerMove == PAPER && programMove == ROCK) ||
-             (playerMove == SCISSORS && programMove == PAPER)) {
-    result = 1;  // Player wins
-  } else {
-    result = -1;  // Program wins
-  }
-  
-  controlLEDs(result);
-}
-
-void controlLEDs(int result) {
-  // Control LEDs based on the result
-  // This is a placeholder implementation
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("");
-  Serial.println("");
-  if (result == 1) {
-    Serial.println("Player wins - Green LED on");
-  } else if (result == -1) {
-    Serial.println("Program wins - Red LED on");
-  } else if (result == 0) {
-    Serial.println("Tie - Yellow LED on");
-  } else {
-    Serial.println("All LEDs off");
-  }
-  Serial.println("");
-  Serial.println("");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
 }
