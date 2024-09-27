@@ -72,7 +72,7 @@ Move getPlayerMove(){
       lastDetectedMove = NOTHING;
     }
     
-    delay(100);  // Adjust delay as needed
+    delay(200);  // Adjust delay as needed
   }
   return lastDetectedMove;
 }

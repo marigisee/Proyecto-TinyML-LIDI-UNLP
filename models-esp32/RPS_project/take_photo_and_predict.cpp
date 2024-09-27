@@ -52,11 +52,13 @@
   #define POOL_SIZE 48 //--> size pooling img
   //#define INPUT_SIZE (ORIG_SIZE * ORIG_SIZE)
 
+  #define USARMAX 0
+
 
 
 float foto[INPUT_SIZE];
-float fotoMaxPooleada[INPUT_SIZE];
-float fotoAveragePooleada[INPUT_SIZE];
+//float fotoMaxPooleada[INPUT_SIZE];
+//float fotoAveragePooleada[INPUT_SIZE];
 data3d_t input = { INPUT_CHANNELS, INPUT_WIDTH, INPUT_HEIGHT, foto};
 data1d_t results;
 char * labels[] = {"Piedra","Papel","Tijera","Nada "};
@@ -68,7 +70,7 @@ void initial_setup() {
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
  
   Serial.begin(115200);
-  delay(1000);
+  delay(1000); 
   Serial.println("Bienvenido pececillo");
   Serial.setDebugOutput(false);
   Serial.println();
@@ -132,15 +134,19 @@ uint16_t take_photo_and_get_prediction() {
 
   uint32_t i;
 
-  maxPooling(fb->buf, fotoMaxPooleada, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
-  averagePooling(fb->buf, fotoAveragePooleada, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
-
-  float usarMax = 0.0f;
-  if (usarMax) {
-    memcpy(foto, fotoMaxPooleada, sizeof(fotoMaxPooleada));
-  } else {
-    memcpy(foto, fotoAveragePooleada, sizeof(fotoAveragePooleada));
-  }
+  unsigned long tiempo = millis();
+  #if USARMAX == 1
+    //maxPooling(fb->buf, fotoMaxPooleada, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
+    //memcpy(foto, fotoMaxPooleada, sizeof(fotoMaxPooleada));
+    
+    maxPooling(fb->buf, foto, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
+    
+  #else 
+    // averagePooling(fb->buf, fotoAveragePooleada, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
+    // memcpy(foto, fotoAveragePooleada, sizeof(fotoAveragePooleada));
+    
+    averagePooling(fb->buf, foto, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
+  #endif
   
   //printImage();
 
@@ -159,14 +165,14 @@ uint16_t take_photo_and_get_prediction() {
     input.data[i] = input.data[i] * 0.00392;
   }
 
-  unsigned long tiempo = millis();
+  //unsigned long tiempo = millis();
   uint16_t prediction = model_predict_class(input, &results);
   tiempo = millis() - tiempo; 
   
-  Serial.print("Prediccion numero ->  "); Serial.println(labels[prediction]);
+  Serial.print("Prediccion ->  "); Serial.println(labels[prediction]);
   Serial.print("Tiempo Inferencia en ms: "); Serial.println(tiempo);
   
-  delay(500);
+  //delay(500);
   Serial.println();
 
   return prediction;
@@ -249,8 +255,12 @@ void printImage(){
 // --->  Para ver los vectores
 void printVectors(){
   Serial.print("Imagen original: "); printVectorInt(fb->buf);  
-  Serial.print("Imagen con maxPooling: "); printVectorFloat(fotoMaxPooleada);  
-  Serial.print("Imagen con averagePooling: "); printVectorFloat(fotoAveragePooleada);  
+  #if USARMAX
+    Serial.print("Imagen con maxPooling: ");
+  #else
+    Serial.print("Imagen con averagePooling: ");
+  #endif
+  printVectorFloat(foto);  
 }
 
 // ----------- printVectorInt ----------- //
