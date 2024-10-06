@@ -1,5 +1,5 @@
 #include "take_photo_and_predict.h"
-
+#include "example_file.h"
 
 // ----------- INCLUDE ----------- //
 #include "Arduino.h"
@@ -74,50 +74,55 @@ void initial_setup() {
   Serial.println("Bienvenido pececillo");
   Serial.setDebugOutput(false);
   Serial.println();
-  Serial.println("Cargado :D -> Configuración camara...");
-
-  // Configuración de la camara
-  camera_config_t config;
-  config.ledc_channel = LEDC_CHANNEL_0;
-  config.ledc_timer = LEDC_TIMER_0;
-  config.pin_d0 = Y2_GPIO_NUM;
-  config.pin_d1 = Y3_GPIO_NUM;
-  config.pin_d2 = Y4_GPIO_NUM;
-  config.pin_d3 = Y5_GPIO_NUM;
-  config.pin_d4 = Y6_GPIO_NUM;
-  config.pin_d5 = Y7_GPIO_NUM;
-  config.pin_d6 = Y8_GPIO_NUM;
-  config.pin_d7 = Y9_GPIO_NUM;
-  config.pin_xclk = XCLK_GPIO_NUM;
-  config.pin_pclk = PCLK_GPIO_NUM;
-  config.pin_vsync = VSYNC_GPIO_NUM;
-  config.pin_href = HREF_GPIO_NUM;
-  config.pin_sscb_sda = SIOD_GPIO_NUM;
-  config.pin_sscb_scl = SIOC_GPIO_NUM;
-  config.pin_pwdn = PWDN_GPIO_NUM;
-  config.pin_reset = RESET_GPIO_NUM;
-  config.xclk_freq_hz = 20000000;
-  config.pixel_format = PIXFORMAT_GRAYSCALE;
   
-  if(psramFound()){
-    config.frame_size = RESOLUCION_CAMARA;
-    config.fb_count = 2;
-  } else {
-    Serial.println("UTILIZA FRAMESIZE_SVGA");
-    config.frame_size = FRAMESIZE_SVGA;
-    config.jpeg_quality = 12;
-    config.fb_count = 1;
-  }
+  #if ESP32_CAM == 1
+    Serial.println("Cargado :D -> Configuración camara...");
+
+    // Configuración de la camara
+    camera_config_t config;
+    config.ledc_channel = LEDC_CHANNEL_0;
+    config.ledc_timer = LEDC_TIMER_0;
+    config.pin_d0 = Y2_GPIO_NUM;
+    config.pin_d1 = Y3_GPIO_NUM;
+    config.pin_d2 = Y4_GPIO_NUM;
+    config.pin_d3 = Y5_GPIO_NUM;
+    config.pin_d4 = Y6_GPIO_NUM;
+    config.pin_d5 = Y7_GPIO_NUM;
+    config.pin_d6 = Y8_GPIO_NUM;
+    config.pin_d7 = Y9_GPIO_NUM;
+    config.pin_xclk = XCLK_GPIO_NUM;
+    config.pin_pclk = PCLK_GPIO_NUM;
+    config.pin_vsync = VSYNC_GPIO_NUM;
+    config.pin_href = HREF_GPIO_NUM;
+    config.pin_sscb_sda = SIOD_GPIO_NUM;
+    config.pin_sscb_scl = SIOC_GPIO_NUM;
+    config.pin_pwdn = PWDN_GPIO_NUM;
+    config.pin_reset = RESET_GPIO_NUM;
+    config.xclk_freq_hz = 20000000;
+    config.pixel_format = PIXFORMAT_GRAYSCALE;
+    
+    if(psramFound()){
+      config.frame_size = RESOLUCION_CAMARA;
+      config.fb_count = 2;
+    } else {
+      Serial.println("UTILIZA FRAMESIZE_SVGA");
+      config.frame_size = FRAMESIZE_SVGA;
+      config.jpeg_quality = 12;
+      config.fb_count = 1;
+    }
+  #endif
   
   // Model init
   model_init();
 
-  // Camera init
-  esp_err_t err = esp_camera_init(&config);
-  if (err != ESP_OK) {
-    Serial.printf("Camera init failed with error 0x%x", err);
-    return;
-  }
+  #if ESP32_CAM == 1
+    // Camera init
+    esp_err_t err = esp_camera_init(&config);
+    if (err != ESP_OK) {
+      Serial.printf("Camera init failed with error 0x%x", err);
+      return;
+    }
+  #endif
 
   Serial.println("Listolin...");
 }
@@ -127,37 +132,38 @@ camera_fb_t * fb = NULL;
 
 
 uint16_t take_photo_and_get_prediction() {
-  fb = esp_camera_fb_get();
-  if (!fb) {
-    ESP_LOGE(TAG, "Camera capture failed");
-  }
+  #if ESP32_CAM == 1
+    fb = esp_camera_fb_get();
+    if (!fb) {
+      ESP_LOGE(TAG, "Camera capture failed");
+    }
+  #endif
 
   uint32_t i;
 
   unsigned long tiempo = millis();
   #if USARMAX == 1
-    //maxPooling(fb->buf, fotoMaxPooleada, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
-    //memcpy(foto, fotoMaxPooleada, sizeof(fotoMaxPooleada));
-    
-    maxPooling(fb->buf, foto, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
-    
+    #if ESP32_CAM == 1
+      maxPooling(fb->buf, foto, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
+    #else
+      maxPooling(sample_data, foto, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
+    #endif
   #else 
-    // averagePooling(fb->buf, fotoAveragePooleada, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
-    // memcpy(foto, fotoAveragePooleada, sizeof(fotoAveragePooleada));
-    
-    averagePooling(fb->buf, foto, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
+    #if ESP32_CAM == 1
+      averagePooling(fb->buf, foto, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
+    #else
+      averagePooling(sample_data, foto, ORIG_SIZE, POOL_SIZE);  // IMPORTANT!! -> foto = foto with averagePooling 
+    #endif
   #endif
   
   //printImage();
 
   //printVectors();
 
-  //Serial.print("Formato: ");  Serial.print(fb->format);
-  //Serial.print(", Len: ");    Serial.print(fb->len);
-  //Serial.print(", Width: ");  Serial.print(fb->width);
-  //Serial.print(", Height: "); Serial.println(fb->height);
-
   esp_camera_fb_return(fb);
+
+  Serial.print("Foto: "); 
+  printImage();
 
   input.data = foto;
   // normalizacion
@@ -169,11 +175,33 @@ uint16_t take_photo_and_get_prediction() {
   uint16_t prediction = model_predict_class(input, &results);
   tiempo = millis() - tiempo; 
   
-  Serial.print("Prediccion ->  "); Serial.println(labels[prediction]);
-  Serial.print("Tiempo Inferencia en ms: "); Serial.println(tiempo);
-  
-  //delay(500);
-  Serial.println();
+  #if ESP32_CAM == 1
+    Serial.print("Prediccion CNN: "); 
+    Serial.print(labels[prediction]);
+    Serial.print(" | ");
+    Serial.print("Tiempo Inferencia en ms: "); 
+    Serial.println(tiempo);
+  #else
+    Serial.print("Tiempo Inferencia en ms: "); 
+    Serial.print(tiempo);
+    Serial.print(" | ");
+    Serial.print("Ingrese la elección del jugador: ");
+    
+    while (Serial.available() == 0) {
+      // Aquí no hacemos nada, solo esperamos
+    }
+        
+    String input = Serial.readString();
+    prediction = input.toInt();
+          
+    // Imprimimos el valor leído
+    Serial.print("Valor leído: ");
+    Serial.print(prediction);
+    Serial.print(" - ");
+    Serial.println(labels[prediction]);
+  #endif
+
+  // Serial.println();
 
   return prediction;
 }
@@ -294,8 +322,12 @@ void printVectorFloat(float * v){
 
 
 // ----------- averagePooling ----------- //
-
-void averagePooling(uint8_t* input, float* output, int origSize, int poolSize) {
+#if ESP32_CAM == 1
+void averagePooling(uint8_t * input, float* output, int origSize, int poolSize) 
+#else 
+void averagePooling(float * input, float* output, int origSize, int poolSize)
+#endif
+{
   int stride = origSize / poolSize;
   for (int i = 0; i < poolSize; i++) {
     for (int j = 0; j < poolSize; j++) {
@@ -313,8 +345,12 @@ void averagePooling(uint8_t* input, float* output, int origSize, int poolSize) {
 }
 
 // ----------- maxPooling ----------- //
-
-void maxPooling(uint8_t* input, float* output, int origSize, int poolSize) {
+#if ESP32_CAM == 1
+void maxPooling(uint8_t * input, float* output, int origSize, int poolSize)
+#else 
+void maxPooling(float * input, float* output, int origSize, int poolSize)
+#endif
+{
   int stride = origSize / poolSize;
   for (int i = 0; i < poolSize; i++) {
     for (int j = 0; j < poolSize; j++) {

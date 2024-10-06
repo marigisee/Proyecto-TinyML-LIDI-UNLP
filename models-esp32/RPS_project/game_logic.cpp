@@ -1,49 +1,16 @@
 #include "game_logic.h"
 
-#define CONSECUTIVE_DETECTIONS_REQUIRED 3
-#define CONSECUTIVE_NOTHING_REQUIRED 3
+char * labels_classes[] = {"Piedra","Papel","Tijera","Nada "};
 
 void iteration() {
-  Move playerMove = getPlayerMove();
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("");
-  Serial.println("");
-  Serial.print("playerMove ->  "); Serial.println(playerMove);
-  Serial.println("");
-  Serial.println("");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  
+  Move playerMove  = getPlayerMove();
   Move machineMove = getMachineMove();
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
+
   Serial.println("####################################################################");
   Serial.println("");
+  Serial.print("playerMove  -> "); Serial.println(labels_classes[playerMove]);
+  Serial.print("machineMove ->  "); Serial.println(labels_classes[machineMove]);
   Serial.println("");
-  Serial.print("machineMove ->  "); Serial.println(machineMove);
-  Serial.println("");
-  Serial.println("");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
-  Serial.println("####################################################################");
   Serial.println("####################################################################");
 
   // Calculate and show result
@@ -72,7 +39,7 @@ Move getPlayerMove(){
       lastDetectedMove = NOTHING;
     }
     
-    delay(200);  // Adjust delay as needed
+    delay(TIME_PLAYER_MS);  // Adjust delay as needed
   }
   return lastDetectedMove;
 }
@@ -93,11 +60,9 @@ void waitForNothings(){
     } else {
       consecutiveNothings = 0;
     }
-    delay(100);  // Adjust delay as needed
+    delay(TIME_NOTHING_MS);  // Adjust delay as needed
   }
 }
-
-
 
 Move takePhoto() {
   // Implement photo capture and analysis
@@ -106,7 +71,7 @@ Move takePhoto() {
   uint16_t moveDetected = take_photo_and_get_prediction();
 
   //int moveDetected = random(4);
-  Serial.print("takePhoto, moveDetected ->  "); Serial.println(moveDetected);
+  // Serial.print("takePhoto, moveDetected ->  "); Serial.println(moveDetected);
   return static_cast<Move>(moveDetected);
 }
 
